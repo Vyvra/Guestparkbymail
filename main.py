@@ -4,7 +4,7 @@ import re
 from datetime import datetime, timedelta
 from imap_tools.mailbox import MailBoxTls
 import asyncio
-from dvsportal.dvsportal.dvsportal import DVSPortal
+from dvsportal.dvsportal import DVSPortal
 import yaml
 
 config = []
