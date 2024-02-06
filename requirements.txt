@@ -1,0 +1,8 @@
+attrs==23.1.0
+cffi==1.16.0
+cryptography==41.0.7
+packaging==23.2
+ply==3.11
+pycairo==1.25.1
+pycparser==2.21
+PyGObject==3.46.0

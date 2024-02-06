@@ -1,0 +1,9 @@
+IMAP_SERVER: "mailserver.com"
+IMAP_PORT: 43
+SMTP_SERVER : "mailserver.com"
+SMTP_PORT : 25
+IMAP_USER : "example.mailserver.com"
+IMAP_PASS : "pass"
+DVS_DOMAIN : "aanvraagparkeren.groningen.nl"
+DVS_USER : "12345"
+DVS_PASS : "1234"
