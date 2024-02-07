@@ -13,7 +13,7 @@ async def main():
     while True:
         await parking.wait_for_mail()
         await parking.proces_request()
-        print("Reastablishing connection to mailserver")
+        print("Reestablishing connection to mailserver")
         time.sleep(10)
 
 
@@ -62,7 +62,7 @@ class Parkapp:
                 await self.register_car(license_plate, 60)
                 reply = f"Thank you for using my parkbymail service. Your registration was succesful. You're registration is valid until {(datetime.now() + timedelta(hours=1))}"
                 print("registration succesful, sending confirmation reply")
-                self.send_reply(reply, self.request.from_values)
+                self.send_reply(reply, self.requester)
             except DVSPortalError as error:
                 print("could not register, will send an error reply")
                 self.process_error(error)
@@ -89,9 +89,9 @@ class Parkapp:
         with smtplib.SMTP(self._SMTP_server, self._SMTP_port) as server:
             # server.set_debuglevel(1)
             server.login(self._SMTP_user, self._SMTP_pass)
-            msg = "From: %s\r\nTo: %s\r\n\r\n" % (self._SMTP_user, to_addr)
-            msg = msg + replymessage
-            server.sendmail(self._SMTP_user, self.requester, msg)
+            msg = "From: %s\r\nTo: %s\r\n\r\n" % (str(self._SMTP_user), str(to_addr))
+            msg = msg + str(replymessage)
+            server.sendmail(self._SMTP_user, to_addr, msg)
             print("reply send")
             server.quit()
 
