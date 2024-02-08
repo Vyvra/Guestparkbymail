@@ -1,8 +1,5 @@
-attrs==23.1.0
-cffi==1.16.0
-cryptography==41.0.7
-packaging==23.2
-ply==3.11
-pycairo==1.25.1
-pycparser==2.21
-PyGObject==3.46.0
+aiohttp==3.9.3
+async_timeout==4.0.3
+imap_tools==1.5.0
+PyYAML==6.0.1
+yarl==1.9.4
