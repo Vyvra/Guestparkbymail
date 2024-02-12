@@ -12,9 +12,6 @@ idna==3.6
 imap-tools==1.5.0
 multidict==6.0.5
 packaging==23.2
-pipreqs==0.4.13
-ply==3.11
-pycairo==1.25.1
 pycparser==2.21
 PyGObject==3.46.0
 pytz==2024.1
