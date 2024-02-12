@@ -104,7 +104,7 @@ class Parkapp:
             reservation = await dvs.create_reservation(
                 license_plate_value=license_plate,
                 date_from=datetime.now(timezone),
-                date_until=(datetime.now() + timedelta(minutes=minutes)),
+                date_until=(datetime.now(timezone) + timedelta(minutes=minutes)),
             )
             return reservation
 
