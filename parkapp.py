@@ -3,7 +3,7 @@ import smtplib
 from imap_tools.mailbox import MailBoxTls
 import yaml
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import re
 import time
 
@@ -99,9 +99,10 @@ class Parkapp:
             password=self._DVS_pass,
         ) as dvs:
             await dvs.update()
+            timezone = pytz.timezone("Europe/Amsterdam")
             reservation = await dvs.create_reservation(
                 license_plate_value=license_plate,
-                date_from=datetime.now(),
+                date_from=datetime.now(timezone),
                 date_until=(datetime.now() + timedelta(minutes=minutes)),
             )
             return reservation
