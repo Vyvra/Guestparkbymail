@@ -3,9 +3,10 @@ import smtplib
 from imap_tools.mailbox import MailBoxTls
 import yaml
 import asyncio
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 import re
 import pytz
+from email.message import EmailMessage
 
 
 async def main():
@@ -126,9 +127,15 @@ class Parkapp:
         with smtplib.SMTP(self._SMTP_server, self._SMTP_port) as server:
             # server.set_debuglevel(1)
             server.login(self._SMTP_user, self._SMTP_pass)
-            msg = "From: %s\r\nTo: %s\r\n\r\n" % (str(self._SMTP_user), str(to_addr))
-            msg = msg + str(replymessage)
-            server.sendmail(self._SMTP_user, to_addr, msg)
+            msg = EmailMessage()
+            msg["Subject"] = "information about your registration"
+            msg["From"] = str(self._SMTP_user)
+            msg["To"] = str(to_addr)
+            msg.set_content(str(replymessage))
+            # msg = "From: %s\r\nTo: %s\r\n\r\n" % (str(self._SMTP_user), str(to_addr))
+            # msg = msg + str(replymessage)
+            # server.sendmail(self._SMTP_user, to_addr, msg)
+            server.send_message(msg)
             print("reply send")
             server.quit()
 
