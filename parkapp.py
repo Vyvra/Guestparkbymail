@@ -5,7 +5,6 @@ import yaml
 import asyncio
 from datetime import datetime, timedelta, timezone
 import re
-import time
 import pytz
 
 
@@ -17,7 +16,6 @@ async def main():
             reply = await parking.proces_request(parking_request.license_plate)
             parking.send_reply(reply, parking_request.sender)
         print("Reestablishing connection to mailserver")
-        time.sleep(10)
 
 
 class Parking_request:
@@ -31,6 +29,7 @@ class Parking_request:
 
 class Parkapp:
     def __init__(self) -> None:
+        """Takes credentials from config.yaml and loads them into variables"""
         with open("config.yaml", "r") as config:
             config = yaml.safe_load(config)
             self._IMAP_server = config["IMAP_SERVER"]
@@ -46,7 +45,7 @@ class Parkapp:
             self._DVS_pass = config["DVS_PASS"]
 
     async def wait_for_mail(self) -> Parking_request:
-        """Opens connectino to IMAP server and waits for new emails"""
+        """Opens connection to IMAP server and waits for new emails"""
         p_request = Parking_request()
         try:
             with MailBoxTls(self._IMAP_server, self._IMAP_port).login(
@@ -76,6 +75,7 @@ class Parkapp:
         return p_request
 
     def parse_plate(self, plate):
+        """Takes license in different formats and converts them to allcaps/nodashes"""
         return plate
 
     async def proces_request(self, license_plate):
@@ -94,6 +94,7 @@ class Parkapp:
                 # self.DVSerror = errortext["Result"]
 
     async def register_car(self, license_plate: str, minutes: int) -> None:
+        """Connects to DVSportal and attemps to register 'license_plate' for 'minutes'"""
         async with DVSPortal(
             api_host=self._DVS_domain,
             identifier=self._DVS_user,
@@ -109,6 +110,7 @@ class Parkapp:
             return reservation
 
     def process_error(self, error) -> str:
+        """Takes the error that DVSPortal raises and converts them to friendly error messages"""
         errorcode = list(error.args)[1]["Result"]
         match errorcode:
             case 3:
@@ -120,6 +122,7 @@ class Parkapp:
         return message
 
     def send_reply(self, replymessage, to_addr):
+        """Connects to SMTP server and sends 'replymessage' to 'to_addr'"""
         with smtplib.SMTP(self._SMTP_server, self._SMTP_port) as server:
             # server.set_debuglevel(1)
             server.login(self._SMTP_user, self._SMTP_pass)
