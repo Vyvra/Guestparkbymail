@@ -1,7 +1,8 @@
+import os
 from dvsportal.dvsportal import DVSPortal, DVSPortalError
 import smtplib
 from imap_tools.mailbox import MailBoxTls
-import yaml
+from dotenv import load_dotenv
 import asyncio
 from datetime import datetime, timedelta
 import re
@@ -30,20 +31,19 @@ class Parking_request:
 
 class Parkapp:
     def __init__(self) -> None:
-        """Takes credentials from config.yaml and loads them into variables"""
-        with open("config.yaml", "r") as config:
-            config = yaml.safe_load(config)
-            self._IMAP_server = config["IMAP_SERVER"]
-            self._IMAP_port = config["IMAP_PORT"]
-            self._SMTP_server = config["SMTP_SERVER"]
-            self._SMTP_port = config["SMTP_PORT"]
-            self._SMTP_user = config["IMAP_USER"]
-            self._SMTP_pass = config["IMAP_PASS"]
-            self._IMAP_user = config["IMAP_USER"]
-            self._IMAP_pass = config["IMAP_PASS"]
-            self._DVS_domain = config["DVS_DOMAIN"]
-            self._DVS_user = config["DVS_USER"]
-            self._DVS_pass = config["DVS_PASS"]
+        """Takes credentials from .env file and loads them into variables"""
+        load_dotenv()
+        self._IMAP_server = os.getenv("IMAP_SERVER")
+        self._IMAP_port = os.getenv("IMAP_PORT")
+        self._SMTP_server = os.getenv("SMTP_SERVER")
+        self._SMTP_port = os.getenv("SMTP_PORT")
+        self._SMTP_user = os.getenv("IMAP_USER")
+        self._SMTP_pass = os.getenv("IMAP_PASS")
+        self._IMAP_user = os.getenv("IMAP_USER")
+        self._IMAP_pass = os.getenv("IMAP_PASS")
+        self._DVS_domain = os.getenv("DVS_DOMAIN")
+        self._DVS_user = os.getenv("DVS_USER")
+        self._DVS_pass = os.getenv("DVS_PASS")
 
     async def wait_for_mail(self) -> Parking_request:
         """Opens connection to IMAP server and waits for new emails"""
