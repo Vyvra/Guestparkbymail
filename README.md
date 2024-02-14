@@ -9,7 +9,7 @@ If your municipality uses DVSportal to give access to guest parking you can use 
 
 ## Getting started
 
-Supply your credentials in the config.yaml file and run parkapp.py.
+Supply your credentials in the .env file and run parkapp.py.
 When guests send an email to the configured emailadress with their licenseplate in the subject line, this license plate will be registered for one hour. 
 
 ## Features
