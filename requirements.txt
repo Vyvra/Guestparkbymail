@@ -14,4 +14,5 @@ urllib3==2.2.0
 voluptuous==0.14.2
 yarg==0.1.9
 yarl==1.9.4
+dvsportal==1.0.0
 python-dotenv==1.0.1

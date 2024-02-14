@@ -1,5 +1,5 @@
 import os
-from dvsportal.dvsportal import DVSPortal, DVSPortalError
+from dvsportal import DVSPortal, DVSPortalError
 import smtplib
 from imap_tools.mailbox import MailBoxTls
 from dotenv import load_dotenv
@@ -141,5 +141,4 @@ class Parkapp:
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    asyncio.run(main())
