@@ -10,7 +10,8 @@ If your municipality uses DVSportal to give access to guest parking you can use 
 ## Getting started
 
 Supply your credentials in the .env file and run parkapp.py.
-When guests send an email to the configured emailadress with their licenseplate in the subject line, this license plate will be registered for one hour. 
+When guests send an email to the configured emailadress with their licenseplate in the subject line, this license plate will be registered for one hour.
+If the car in question is already registered, it's running registration will be canceled and it will immediately reregister.  
 
 ## Features
 
@@ -21,7 +22,6 @@ When guests send an email to the configured emailadress with their licenseplate 
 ### not implemented yet
 
 - Adjustable parking time requests.
-- Requests of time extension
 
 ## Credits
 
