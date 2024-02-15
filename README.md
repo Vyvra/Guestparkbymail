@@ -22,7 +22,11 @@ If the car in question is already registered, it's running registration will be 
 ### not implemented yet
 
 - Adjustable parking time requests.
+- Whitelist/blacklist users
 
+## Issues and requests
+
+For issues, feature requests, and contributions, please use the GitHub Issue Tracker
 ## Credits
 
 This script was built upon the DVS Portal API implementations by [tcoenraad](https://github.com/tcoenraad), found [here](https://github.com/tcoenraad/python-dvsportal) and [Chessspider](https://github.com/ChessSpider), found [here](https://github.com/ChessSpider/dvsportal)

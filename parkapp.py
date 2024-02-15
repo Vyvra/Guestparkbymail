@@ -33,7 +33,7 @@ class Parking_request:
 class Parkapp:
     def __init__(self) -> None:
         """Takes credentials from the environment or .env file and loads them into variables"""
-        load_dotenv(override=False)
+        load_dotenv()
         self._IMAP_server = str(os.getenv("IMAP_SERVER"))
         self._IMAP_port = int(os.getenv("IMAP_PORT") or 0)
         self._SMTP_server = str(os.getenv("SMTP_SERVER"))
