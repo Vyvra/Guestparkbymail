@@ -4,9 +4,8 @@ import smtplib
 from imap_tools.mailbox import MailBoxTls
 from dotenv import load_dotenv
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from imap_tools.message import MailMessage
-import pytz
 from email.message import EmailMessage
 
 
@@ -118,12 +117,11 @@ class Parkapp:
                         "reservation_id"
                     ],
                 )
-            # it should be possible to find a way to get a timezone object without importing another thing, right?
-            timezone = pytz.timezone("Europe/Amsterdam")
+            tz = timezone(timedelta(hours=1))
             reservation = await dvs.create_reservation(
                 license_plate_value=license_plate,
-                date_from=datetime.now(timezone),
-                date_until=(datetime.now(timezone) + timedelta(minutes=minutes)),
+                date_from=datetime.now(tz),
+                date_until=(datetime.now(tz) + timedelta(minutes=minutes)),
             )
             return reservation
 
