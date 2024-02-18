@@ -8,16 +8,18 @@ from datetime import datetime, timedelta
 from imap_tools.message import MailMessage
 import pytz
 from email.message import EmailMessage
+from logger import getlogger
 
 
 async def main():
+    logger = getlogger("main")
     while True:
         parking = Parkapp()
         parking_request = await parking.wait_for_request_mail()
         if parking_request.succes:
             parking_request = await parking.proces_request(parking_request)
             parking.send_reply(parking_request)
-        print("Reestablishing connection to mailserver")
+        logger.debug("Reestablishing connection to mailserver")
 
 
 class Parking_request:
@@ -45,6 +47,7 @@ class Parkapp:
         self._DVS_domain = str(os.getenv("DVS_DOMAIN"))
         self._DVS_user = str(os.getenv("DVS_USER"))
         self._DVS_pass = str(os.getenv("DVS_PASS"))
+        self.logger = getlogger("parkapp")
 
     async def wait_for_request_mail(self) -> Parking_request:
         """Opens connection to IMAP server and waits for new requests"""
@@ -53,16 +56,20 @@ class Parkapp:
             with MailBoxTls(self._IMAP_server, self._IMAP_port).login(
                 self._IMAP_user, self._IMAP_pass
             ) as mailbox:
-                print("waiting for requests")
+                self.logger.debug("waiting for requests")
                 responses = mailbox.idle.wait(timeout=1000)
                 # Timeout must be less than 29 minutes.
                 if responses:
-                    print("new message recieved")
+                    self.logger.debug("new message recieved")
+                    self.logger.debug("new message recieved")
                     for msg in mailbox.fetch(limit=1, reverse=True):
                         p_request = self.parse_request(msg)
                         return p_request
         except OSError as error:
-            print(f"could not establish connection to Imap server: {error}")
+            self.logger.critical(
+                f"could not establish connection to Imap server: {error}"
+            )
+
             p_request = Parking_request()
             p_request.succes = False
         return p_request
@@ -96,9 +103,9 @@ class Parkapp:
         try:
             await self.register_car(request.license_plate, request.time)
             request.reply = f"Thank you for using my Guestparkbymail service. Your registration was succesful. You're registration is valid until {str(datetime.now() + timedelta(hours=1))[:-10]}"
-            print("registration succesful, sending confirmation reply")
+            self.logger.debug("registration succesful, sending confirmation reply")
         except DVSPortalError as error:
-            print("could not register, will send an error reply")
+            self.logger.info("could not register, will send an error reply")
             request.reply = self.process_error(error)
         return request
 
@@ -111,7 +118,6 @@ class Parkapp:
         ) as dvs:
             await dvs.update()
             # if car is already registered, cancel reservation and reregister.
-            print(dvs.active_reservations)
             if license_plate in dvs.active_reservations:
                 await dvs.end_reservation(
                     reservation_id=dvs.active_reservations[license_plate][
@@ -150,7 +156,7 @@ class Parkapp:
             msg["To"] = str(request.sender)
             msg.set_content(str(request.reply))
             server.send_message(msg)
-            print("reply send")
+            self.logger.debug("reply send")
             server.quit()
 
 
