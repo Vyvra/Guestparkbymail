@@ -10,16 +10,19 @@ import os
 import pytz
 import smtplib
 
+LOGGER = getlogger("parkapp")
+
 
 async def main():
-    logger = getlogger("main")
+    # logger = getlogger("main")
     while True:
         parking = Parkapp()
-        parking_request = await parking.wait_for_request_mail()
-        if parking_request.succes:
-            parking_request = await parking.proces_request(parking_request)
-            parking.send_reply(parking_request)
-        logger.debug("Reestablishing connection to mailserver")
+        request = Parking_request()
+        request = await parking.wait_for_request_mail(request)
+        if request.succes:
+            request = await parking.proces_request(request)
+            request = parking.send_reply(request)
+        # logger.debug("Reestablishing connection to mailserver")
 
 
 class Parking_request:
@@ -29,7 +32,7 @@ class Parking_request:
         self.request_type: str
         self.license_plate: str
         self.succes = False
-        self.reply: str
+        self.reply = EmailMessage()
 
 
 class Parkapp:
@@ -47,44 +50,43 @@ class Parkapp:
         self._DVS_domain = str(os.getenv("DVS_DOMAIN"))
         self._DVS_user = str(os.getenv("DVS_USER"))
         self._DVS_pass = str(os.getenv("DVS_PASS"))
-        self.logger = getlogger("parkapp")
+        self.logger = LOGGER
 
-    async def wait_for_request_mail(self) -> Parking_request:
+    async def wait_for_request_mail(self, request) -> Parking_request:
         """Opens connection to IMAP server and waits for new requests"""
-        p_request = Parking_request()
         try:
             with MailBoxTls(self._IMAP_server, self._IMAP_port).login(
                 self._IMAP_user, self._IMAP_pass
             ) as mailbox:
                 self.logger.debug("waiting for requests")
-                responses = mailbox.idle.wait(timeout=1000)
+                responses = mailbox.idle.wait(timeout=1500)
                 # Timeout must be less than 29 minutes.
                 if responses:
                     self.logger.debug("new message recieved")
-                    self.logger.debug("new message recieved")
                     for msg in mailbox.fetch(limit=1, reverse=True):
-                        p_request = self.parse_request(msg)
-                        return p_request
+                        request = self.parse_request(msg, request)
+                        return request
         except OSError as error:
             self.logger.critical(
                 f"could not establish connection to Imap server: {error}"
             )
 
-            p_request = Parking_request()
-            p_request.succes = False
-        return p_request
+            request.succes = False
+        return request
 
-    def parse_request(self, msg: MailMessage) -> Parking_request:
-        p = Parking_request()
+    def parse_request(
+        self, msg: MailMessage, request: Parking_request
+    ) -> Parking_request:
+        """Takes a Mailmessage and converts it a Parking_request"""
         for word in msg.subject.split():
             # A problem with this is that if there are multiple plates in the subject line it will only register the last one.
             if plate := self.parse_plate(word):
-                p.license_plate = plate
-                p.sender = msg.to[0]
-                p.succes = True
+                request.license_plate = plate
+                request.sender = msg.from_
+                request.succes = True
             else:
-                p.succes = False
-        return p
+                request.succes = False
+        return request
 
     def parse_plate(self, plate: str) -> str | None:
         """Takes license in different formats and converts them to allcaps/nodashes, returns None if no valid license_plate could be constructed"""
@@ -102,11 +104,19 @@ class Parkapp:
         """Tries to fulfill the provided request and returns a reply message to send"""
         try:
             await self.register_car(request.license_plate, request.time)
-            request.reply = f"Thank you for using my Guestparkbymail service. Your registration was succesful. You're registration is valid until {str(datetime.now() + timedelta(hours=1))[:-10]}"
+            request.reply.set_content(
+                f"Thank you for using my Guestparkbymail service. Your registration was succesful. You're registration is valid until {str(datetime.now() + timedelta(hours=1))[:-10]}"
+            )
+            request.reply[
+                "Subject"
+            ] = f"Succesful registeration for {request.license_plate}"
             self.logger.debug("registration succesful, sending confirmation reply")
         except DVSPortalError as error:
             self.logger.info("could not register, will send an error reply")
-            request.reply = self.process_error(error)
+            request.reply.set_content(self.process_error(error))
+            request.reply[
+                "Subject"
+            ] = f"WARNING, registration for {request.license_plate} unsuccesful"
         return request
 
     async def register_car(self, license_plate: str, minutes: int) -> None:
@@ -146,16 +156,13 @@ class Parkapp:
         return message
 
     def send_reply(self, request: Parking_request):
-        """Connects to SMTP server and sends 'replymessage' to 'to_addr'"""
+        """Connects to SMTP server and sends the reply from the request.reply variable"""
         with smtplib.SMTP(self._SMTP_server, self._SMTP_port) as server:
             # server.set_debuglevel(1)
             server.login(self._SMTP_user, self._SMTP_pass)
-            msg = EmailMessage()
-            msg["Subject"] = "information about your registration"
-            msg["From"] = str(self._SMTP_user)
-            msg["To"] = str(request.sender)
-            msg.set_content(str(request.reply))
-            server.send_message(msg)
+            request.reply["From"] = str(self._SMTP_user)
+            request.reply["To"] = str(request.sender)
+            server.send_message(request.reply)
             self.logger.debug("reply send")
             server.quit()
 
