@@ -105,7 +105,7 @@ class Parkapp:
         try:
             await self.register_car(request.license_plate, request.time)
             request.reply.set_content(
-                f"Thank you for using my Guestparkbymail service. Your registration was succesful. You're registration is valid until {str(datetime.now() + timedelta(hours=1))[:-10]}"
+                f"Thank you for using my Guestparkbymail service. Your registration was succesful. You're registration is valid until {str(datetime.now(pytz.timezone("Europe/Amsterdam")) + timedelta(hours=1))[:-10]}"
             )
             request.reply[
                 "Subject"
