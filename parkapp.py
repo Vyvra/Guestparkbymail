@@ -102,10 +102,21 @@ class Parkapp:
 
     async def proces_request(self, request: Parking_request) -> Parking_request:
         """Tries to fulfill the provided request and returns a reply message to send"""
+        # Reject unauthorized requests
+        if self.authorized_sender(request) is False:
+            request.reply["Subject"] = "Unauthorized parking request"
+            request.reply.set_content(
+                "Sorry requests for parking from this email adress are not allowed. Please use an emailadress that is authorized for use by this service."
+            )
+            self.logger.warning(
+                f"recieved unauthorized request from email {request.sender}"
+            )
+            return request
+
         try:
             await self.register_car(request.license_plate, request.time)
             request.reply.set_content(
-                f"Thank you for using my Guestparkbymail service. Your registration was succesful. You're registration is valid until {str(datetime.now(pytz.timezone("Europe/Amsterdam")) + timedelta(hours=1))[:-10]}"
+                f"Thank you for using my Guestparkbymail service. Your registration was succesful. You're registration is valid until {str(datetime.now(pytz.timezone('Europe/Amsterdam')) + timedelta(hours=1))[:-10]}"
             )
             request.reply[
                 "Subject"
@@ -165,6 +176,20 @@ class Parkapp:
             server.send_message(request.reply)
             self.logger.debug("reply send")
             server.quit()
+
+    def authorized_sender(self, request: Parking_request) -> bool:
+        """Checks if requests from request.sender are allowed based on whitelist/blacklist settings"""
+        whitelist = os.getenv("WHITELIST")
+        blacklist = os.getenv("BLACKLIST")
+        if whitelist:
+            if request.sender in whitelist:
+                return True
+            else:
+                return False
+        if blacklist:
+            if request.sender in blacklist:
+                return False
+        return True
 
 
 if __name__ == "__main__":
