@@ -1,0 +1,39 @@
+<!doctype html>
+<title>Hello!</title>
+
+<h1>Hello welcome to {{ site }}!</h1>
+<form>
+  <label for="license_plate">License plate:</label>
+  <input type="text" id="license_plate" name="license_plate" /><br /><br />
+  <label for="email">Emailadress: </label>
+  <input type="text" id="email" name="email" /><br /><br />
+  <input id="post-btn" type="button" value="Submit" onclick="postfn()" />
+  <p id="reply"></p>
+</form>
+
+<script>
+  function postfn() {
+    let license_plate = document.getElementById("license_plate").value;
+    let email = document.getElementById("email").value;
+    console.log(`license_plate: ${license_plate}`);
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/register");
+    xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+    const body = JSON.stringify({
+      license_plate: license_plate,
+      email: email,
+    });
+    console.log(body);
+    xhr.send(body);
+    xhr.onload = () => {
+      if (xhr.readyState === xhr.DONE) {
+        if (xhr.status === 200) {
+          console.log(xhr.response);
+          console.log(xhr.responseText);
+          let response = xhr.response;
+          document.getElementById("reply").innerHTML = response;
+        }
+      }
+    };
+  }
+</script>

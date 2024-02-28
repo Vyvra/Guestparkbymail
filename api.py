@@ -1,5 +1,5 @@
 import json
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, render_template, request
 from parkapp import Parking_request, Parkapp
 import asyncio
 
@@ -17,4 +17,10 @@ def register_car():
     prequest.sender = email
     parkapp = Parkapp()
     prequest = asyncio.run(parkapp.proces_request(prequest))
-    return str(prequest.reply)
+    reply = {"reply": (prequest.reply.get_content)}
+    return prequest.reply.get_content()
+
+
+@app.route("/", methods=["GET"])
+def welcome():
+    return render_template("index.html", site="guestparkbymail")
