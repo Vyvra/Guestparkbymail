@@ -1,7 +1,12 @@
 import json
 from flask import Flask, jsonify, render_template, request
+
+import sys
+
+sys.path.append("../")
 from parkapp import Parking_request, Parkapp
 import asyncio
+
 
 app = Flask(__name__)
 
