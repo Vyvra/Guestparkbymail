@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Run app.py when the container launches
 #CMD ["flask", "--app", "api.py", "run", "&!", "python", "parkapp.py"]
-CMD ["bash", "-c", "flask --app webapp run & python parkapp.py"]
+CMD ["bash", "-c", "flask --app webapp run --host=0.0.0.0 & python parkapp.py"]
