@@ -28,6 +28,11 @@ def register_car():
     return prequest.reply.get_content()
 
 
+@api.route("/cancelregistration", methods=["POST"])
+def cancelregistration():
+    return "cancelation functionality not implemented yet"
+
+
 @api.route("/addblacklist", methods=["POST"])
 def addblacklist():
     return "blacklist functionality not implimented yet"
